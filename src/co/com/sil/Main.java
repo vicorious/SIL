@@ -34,7 +34,7 @@ public class Main
 	{
 		try
 		{
-			if(args == null || args.length == 0)
+			if(args == null || args.length == 0 || args.length > 1)
 			{
 				throw new Exception("Empty args no valid!");
 			}
