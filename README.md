@@ -22,8 +22,8 @@ Para desencriptar
 
 ```java
 
-		SIL sil = new SIL();
-		String desencriptada = sil.desencriptar(mi_cadena_encriptada);
+SIL sil = new SIL();
+String desencriptada = sil.desencriptar(mi_cadena_encriptada);
 
 ```
 
