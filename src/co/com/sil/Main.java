@@ -64,8 +64,9 @@ public class Main
 	 * Encargado de encriptar una cadena en literales
 	 * @param mi_cadena, Cadena original
 	 * @return cadena encriptada con algoritmo SIL
+	 * @throws Exception 
 	 */
-	public static String encriptar(String mi_cadena)
+	public static String encriptar(String mi_cadena) throws Exception
 	{
 		SIL sil = new SIL();
 		String encriptado = sil.encriptado(mi_cadena);

@@ -2,8 +2,11 @@ package co.com.sil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 /**
  *  <p>Seguridad</p>	
@@ -37,6 +40,8 @@ public class SIL
 		    
     private static ArrayList<String> letras;
     private static ArrayList<String> numeros;
+	private static Map<String, Integer> mapa;
+	//private static String llave = "LLAVE";
    /**
     * Constructor
     */
@@ -44,20 +49,42 @@ public class SIL
     {
        SIL.letras = new ArrayList<String>();
        SIL.numeros = new ArrayList<String>();
+              
        fullNumeros();
        fullLetras();
+       mapaLetrasNumero();
+              
     }//constructor
+    
     /**
      * Encripta una cadena SIL
      * @param cadena a escriptar
      * @return Retorna la cadena encriptada
+     * @throws Exception 
      */
-    public String encriptado(String cadena) 
+    public String encriptado(String... parametros) throws Exception 
     {
+    	Exception e = new Exception("Null args!!");
+    	String cadena = new String();
+    	String tipo_operacion = new String();
         // - , +
         // true, empeiza sumando, false empieza restando
         //& numeros negativos
         // / numeros de 2 cifras
+    	if(parametros == null || parametros.length == 0)
+    	{
+    		throw e;
+    		
+    	}else if(parametros.length == 1)
+    	{
+    		cadena = parametros[0];
+    		
+    	}else if(parametros.length == 2)
+    	{
+    		cadena = parametros[0];
+    		tipo_operacion = parametros[1];
+    	}
+    	
         verificarCadena(cadena);
         ArrayList<String> diccionario = new ArrayList<String>();
         diccionario = letras;
@@ -68,11 +95,10 @@ public class SIL
         Map<String, Object> mapa = new HashMap<String, Object>();
         String finalpass = "";
         StringBuilder constructorcadenas = new StringBuilder();
-        boolean tipooperacion = true;
+        boolean tipooperacion = tipo_operacion.isEmpty() ? Boolean.FALSE : Boolean.valueOf(tipo_operacion);
 
         for (int j = 0; j < diccionario.size(); j++) 
         {
-
             mapa.put(diccionario.get(j), contador);
             contador++;
         }
@@ -80,7 +106,8 @@ public class SIL
         if (isNumeric(String.valueOf(cadenasfinal[0]))) 
         {
             base = Integer.parseInt(String.valueOf(cadenasfinal[0]));
-        } else 
+        } 
+        else 
         {
             for (Map.Entry<String, Object> elemento2 : mapa.entrySet()) 
             {
@@ -100,7 +127,8 @@ public class SIL
 
                 finalpass = elemento2.getKey();
             }
-        } else 
+        } 
+        else 
         {
             finalpass = String.valueOf(base);
         }
@@ -114,7 +142,8 @@ public class SIL
                     if (i == 0) 
                     {
                         break;
-                    } else 
+                    } 
+                    else 
                     {
                         if (isNumeric(String.valueOf(cadenasfinal[i]))) 
                         {
@@ -127,7 +156,8 @@ public class SIL
                                 tipooperacion = false;
 
                                 break;
-                            } else 
+                            } 
+                            else 
                             {
                                 if ((Integer.parseInt(String.valueOf(cadenasfinal[i])) - base) <= -10) 
                                 {
@@ -137,7 +167,8 @@ public class SIL
                                 tipooperacion = true;
                                 break;
                             }
-                        } else 
+                        } 
+                        else 
                         {
                             if (elemento2.getKey().equals(String.valueOf(cadenasfinal[i]))) 
                             {
@@ -161,7 +192,8 @@ public class SIL
 
                                     }
 
-                                } else 
+                                } 
+                                else 
                                 {
                                     temporal = temporal - Integer.parseInt(finalpass.toString());
                                     if (temporal > 0) 
@@ -175,7 +207,8 @@ public class SIL
                                             }
 
                                         }
-                                    } else 
+                                    } 
+                                    else 
                                     {
                                         constructorcadenas.append("&¬" + elemento2.getKey());
                                         tipooperacion = true;
@@ -184,13 +217,15 @@ public class SIL
                             }
                         }
                     }
-                } else 
+                } 
+                else 
                 {
-                    //if(elemento2.getKey().equals(finalpass)) {
+                    
                     if (i == 0) 
                     {
                         break;
-                    } else 
+                    } 
+                    else 
                     {
                         if (isNumeric(String.valueOf(cadenasfinal[i]))) 
                         {
@@ -203,7 +238,8 @@ public class SIL
                                 constructorcadenas.append(Integer.parseInt(String.valueOf(cadenasfinal[i])) + base);
                                 tipooperacion = false;
                                 break;
-                            } else 
+                            } 
+                            else 
                             {
                                 if ((Integer.parseInt(String.valueOf(cadenasfinal[i])) - base) <= -10) 
                                 {
@@ -213,7 +249,8 @@ public class SIL
                                 tipooperacion = true;
                                 break;
                             }
-                        } else 
+                        } 
+                        else 
                         {
                             if (elemento2.getKey().equals(String.valueOf(cadenasfinal[i]))) 
                             {
@@ -237,7 +274,8 @@ public class SIL
 
                                     }
 
-                                } else 
+                                } 
+                                else 
                                 {
                                     temporal = temporal - Integer.parseInt(baseletra.get(finalpass).toString());
                                     if (temporal > 0) 
@@ -253,7 +291,8 @@ public class SIL
                                             }
 
                                         }
-                                    } else 
+                                    } 
+                                    else 
                                     {
                                         constructorcadenas.append("&¬" + elemento2.getKey());
                                         tipooperacion = true;
@@ -267,9 +306,15 @@ public class SIL
                 }
             }
         }
-        finalpass += constructorcadenas.toString();
+        finalpass += constructorcadenas.toString();  
+        //System.out.println("Encriptada 1: "+finalpass);
         String hash = getHashNumber(finalpass);
+        finalpass = calculo_matricial(finalpass);
+        //System.out.println("After matricial: "+finalpass);
         finalpass = addHash(finalpass, hash);
+        //System.out.println("After Add Hash: "+finalpass);
+        
+        
         return finalpass;
         
     }//encriptado
@@ -281,8 +326,28 @@ public class SIL
       * @return literal en su estado original
       * @throws PersistenciaException genera cuando hay desbordamiento a la derecha de una coleccion fija
       */
-     public String desencriptar(String cadena) throws Exception
+     public String desencriptar(String... parametros) throws Exception
      {
+     	Exception e = new Exception("Null args!!");
+     	String cadena = new String();
+     	String tipo_operacion = new String();
+         // - , +
+         // true, empeiza sumando, false empieza restando
+         //& numeros negativos
+         // / numeros de 2 cifras
+     	if(parametros == null || parametros.length == 0)
+     	{
+     		throw e;
+     		
+     	}else if(parametros.length == 1)
+     	{
+     		cadena = parametros[0];
+     		
+     	}else if(parametros.length == 2)
+     	{
+     		cadena = parametros[0];
+     		tipo_operacion = parametros[1];
+     	}
          // - , +
          // true, empieza sumando, false empieza restando
          // valor de depreciacion  )
@@ -291,14 +356,18 @@ public class SIL
          char[] cadenas = null;
          String[] cadenasfinal = null;
          ArrayList<String> diccionario = new ArrayList<String>();
-         diccionario = letras;
+         diccionario = letras;                 
          cadena = reverseHash(cadena);
+         //System.out.println("After remove hash: "+cadena);
+         cadena = calculo_matricial_r(cadena);
+         //System.out.println("After remove matricial: "+cadena);
+         
          int base = 0;
          Map<String, Object> baseletra = new HashMap<String, Object>();
          Map<String, Object> mapa = new TreeMap<String, Object>();
          String finalpass = "";
          StringBuilder constructorcadenas = new StringBuilder();
-         boolean tipooperacion = false;
+         boolean tipooperacion = tipo_operacion.isEmpty() ? Boolean.TRUE : Boolean.valueOf(tipo_operacion);
 
          try 
          {
@@ -319,7 +388,8 @@ public class SIL
              if (isNumeric(String.valueOf(cadenasfinal[0]))) 
              {
                  base = Integer.parseInt(String.valueOf(cadenasfinal[0]));
-             } else 
+             } 
+             else 
              {
                  for (Map.Entry<String, Object> elemento2 : mapa.entrySet()) 
                  {
@@ -339,7 +409,8 @@ public class SIL
 
                      finalpass = elemento2.getKey();
                  }
-             } else 
+             } 
+             else 
              {
                  finalpass = String.valueOf(base);
              }
@@ -353,7 +424,8 @@ public class SIL
                          if (i == 0) 
                          {
                              break;
-                         } else 
+                         } 
+                         else 
                          {
                              if (isNumeric(String.valueOf(cadenasfinal[i]))) 
                              {
@@ -363,7 +435,8 @@ public class SIL
                                                                base);
                                      tipooperacion = false;
                                      break;
-                                 } else 
+                                 } 
+                                 else 
                                  {
 
                                      constructorcadenas.append(Integer.parseInt(String.valueOf(cadenasfinal[i])) -
@@ -371,14 +444,16 @@ public class SIL
                                      tipooperacion = true;
                                      break;
                                  }
-                             } else 
+                             } 
+                             else 
                              {
                                  if (elemento2.getKey().equals(String.valueOf(cadenasfinal[i]))) 
                                  {
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
                                      if (cadenasfinal[i].equals("/") && isNumeric(cadenasfinal[i + 1])) 
                                      {
@@ -394,7 +469,8 @@ public class SIL
                                          cadenasfinal[i + 2] = ")";
                                          i--;
                                          break;
-                                     }else if(cadenasfinal[i].equals("/") && cadenasfinal[i + 1].equals("-") && isNumeric(cadenasfinal[i + 2])) 
+                                     }
+                                     else if(cadenasfinal[i].equals("/") && cadenasfinal[i + 1].equals("-") && isNumeric(cadenasfinal[i + 2])) 
                                      {
                                          StringBuilder suma = new StringBuilder();
                                          suma.append(cadenasfinal[i + 1]);
@@ -415,7 +491,8 @@ public class SIL
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
                                      if (String.valueOf(cadenasfinal[i]).equals("-") && isNumeric(cadenasfinal[i + 1])) 
                                      {
@@ -439,7 +516,8 @@ public class SIL
                                              i--;
                                              break;
 
-                                         }else if(cadenasfinal[i + 1] != cadenasfinal[cadenasfinal.length - 1]) 
+                                         }
+                                         else if(cadenasfinal[i + 1] != cadenasfinal[cadenasfinal.length - 1]) 
                                          {
                                              StringBuilder suma = new StringBuilder();
                                              suma.append(cadenasfinal[i]);
@@ -470,7 +548,8 @@ public class SIL
                                                  if (m == 0) 
                                                  {
 
-                                                 } else 
+                                                 } 
+                                                 else 
                                                  {
                                                      cadenasfinal[i] += suma.charAt(m);
                                                  }
@@ -481,7 +560,8 @@ public class SIL
                                              break;
 
 
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              StringBuilder suma = new StringBuilder();
                                              suma.append(cadenasfinal[i]);
@@ -491,7 +571,8 @@ public class SIL
                                                  if (m == 0) 
                                                  {
 
-                                                 } else 
+                                                 } 
+                                                 else 
                                                  {
                                                      cadenasfinal[i] += suma.charAt(m);
                                                  }
@@ -507,7 +588,8 @@ public class SIL
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
                                      if (String.valueOf(cadenasfinal[i]).equals("&") && cadenasfinal[i + 1].equals("¬")) 
                                      {
@@ -518,7 +600,8 @@ public class SIL
                                              cadenasfinal[i + 1] = ")";
                                              i = i + 2;
                                              break;
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              constructorcadenas.append(String.valueOf(cadenasfinal[i + 2]));
                                              tipooperacion = true;
@@ -532,7 +615,8 @@ public class SIL
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
 
                                      if (cadenasfinal[i].equals("¿") && cadenasfinal[i + 1].equals("¬") && isNumeric(cadenasfinal[i + 2])) 
@@ -555,7 +639,8 @@ public class SIL
                                                          tipooperacion = false;
                                                          i = i + 2;
                                                          break;
-                                                     } else 
+                                                     } 
+                                                     else 
                                                      {
                                                          constructorcadenas.append(elemento3.getKey());
                                                          tipooperacion = true;
@@ -583,7 +668,8 @@ public class SIL
                                                          tipooperacion = false;
                                                          i = i + 3;;
                                                          break;
-                                                     } else 
+                                                     } 
+                                                     else 
                                                      {
                                                          constructorcadenas.append(elemento3.getKey());
                                                          tipooperacion = true;
@@ -593,7 +679,8 @@ public class SIL
 
                                                  }
                                              }
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              suma.append(cadenasfinal[i + 2]);
                                              for (Map.Entry<String, Object> elemento3 : mapa.entrySet()) 
@@ -606,7 +693,8 @@ public class SIL
                                                          tipooperacion = false;
                                                          i = i + 2;
                                                          break;
-                                                     } else 
+                                                     } 
+                                                     else 
                                                      {
                                                          constructorcadenas.append(elemento3.getKey());
                                                          tipooperacion = true;
@@ -636,7 +724,8 @@ public class SIL
 
                                          }
 
-                                     } else 
+                                     } 
+                                     else 
                                      {
                                          temporal = temporal - Integer.parseInt(finalpass.toString());
                                          if (temporal > 0) {
@@ -652,26 +741,30 @@ public class SIL
 
                                              }
                                              break;
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              constructorcadenas.append(String.valueOf(cadenasfinal[i + 1]));
                                              tipooperacion = true;
                                              i++;
                                          }
                                      }
-                                 } else 
+                                 } 
+                                 else 
                                  {
 
                                  }
                              }
                          }
-                     } else 
+                     } 
+                     else 
                      {
                          //if(elemento2.getKey().equals(finalpass)) {
                          if (i == 0) 
                          {
                              break;
-                         } else 
+                         } 
+                         else 
                          {
                              if (isNumeric(String.valueOf(cadenasfinal[i]))) 
                              {
@@ -681,7 +774,8 @@ public class SIL
                                                                base);
                                      tipooperacion = false;
                                      break;
-                                 } else 
+                                 } 
+                                 else 
                                  {
 
                                      constructorcadenas.append(Integer.parseInt(String.valueOf(cadenasfinal[i])) -
@@ -689,14 +783,16 @@ public class SIL
                                      tipooperacion = true;
                                      break;
                                  }
-                             } else 
+                             } 
+                             else 
                              {
                                  if (elemento2.getKey().equals(String.valueOf(cadenasfinal[i]))) 
                                  {
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
                                      if (cadenasfinal[i].equals("/") && isNumeric(cadenasfinal[i + 1])) 
                                      {
@@ -713,7 +809,8 @@ public class SIL
                                          cadenasfinal[i + 2] = ")";
                                          i--;
                                          break;
-                                     }else if(cadenasfinal[i].equals("/") && cadenasfinal[i + 1].equals("-") && isNumeric(cadenasfinal[i + 2])) 
+                                     }
+                                     else if(cadenasfinal[i].equals("/") && cadenasfinal[i + 1].equals("-") && isNumeric(cadenasfinal[i + 2])) 
                                      {
                                          StringBuilder suma = new StringBuilder();
                                          suma.append(cadenasfinal[i + 1]);
@@ -735,7 +832,8 @@ public class SIL
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
                                      if (String.valueOf(cadenasfinal[i]).equals("-") && isNumeric(cadenasfinal[i + 1])) 
                                      {
@@ -749,7 +847,8 @@ public class SIL
                                                  if (m == 0) 
                                                  {
 
-                                                 } else 
+                                                 } 
+                                                 else 
                                                  {
                                                      cadenasfinal[i] += suma.charAt(m);
                                                  }
@@ -769,7 +868,8 @@ public class SIL
                                                  if (m == 0) 
                                                  {
 
-                                                 } else 
+                                                 } 
+                                                 else 
                                                  {
                                                      cadenasfinal[i] += suma.charAt(m);
                                                  }
@@ -791,7 +891,8 @@ public class SIL
                                                  if (m == 0) 
                                                  {
 
-                                                 } else 
+                                                 } 
+                                                 else 
                                                  {
                                                      cadenasfinal[i] += suma.charAt(m);
                                                  }
@@ -802,7 +903,8 @@ public class SIL
                                              break;
 
 
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              StringBuilder suma = new StringBuilder();
                                              suma.append(cadenasfinal[i]);
@@ -812,7 +914,8 @@ public class SIL
                                                  if (m == 0) 
                                                  {
 
-                                                 } else 
+                                                 } 
+                                                 else 
                                                  {
                                                      cadenasfinal[i] += suma.charAt(m);
                                                  }
@@ -828,7 +931,8 @@ public class SIL
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
                                      if (String.valueOf(cadenasfinal[i]).equals("&") && cadenasfinal[i + 1].equals("¬")) 
                                      {
@@ -839,7 +943,8 @@ public class SIL
                                              cadenasfinal[i + 1] = ")";
                                              i = i + 2;
                                              break;
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              constructorcadenas.append(String.valueOf(cadenasfinal[i + 2]));
                                              tipooperacion = true;
@@ -853,7 +958,8 @@ public class SIL
                                      if(cadenasfinal[i] == cadenasfinal[cadenasfinal.length - 1] ) 
                                      {
                                          
-                                     }else
+                                     }
+                                     else
                                      {
 
                                      if (cadenasfinal[i].equals("¿") && cadenasfinal[i + 1].equals("¬") && isNumeric(cadenasfinal[i + 2])) 
@@ -875,7 +981,8 @@ public class SIL
                                                          tipooperacion = false;
                                                          i++;
                                                          break;
-                                                     } else 
+                                                     } 
+                                                     else 
                                                      {
                                                          constructorcadenas.append(elemento3.getKey());
                                                          tipooperacion = true;
@@ -902,7 +1009,8 @@ public class SIL
                                                          tipooperacion = false;
                                                          i = i + 3;;
                                                          break;
-                                                     } else 
+                                                     } 
+                                                     else 
                                                      {
                                                          constructorcadenas.append(elemento3.getKey());
                                                          tipooperacion = true;
@@ -912,7 +1020,8 @@ public class SIL
 
                                                  }
                                              }
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              suma.append(cadenasfinal[i + 2]);
                                              for (Map.Entry<String, Object> elemento3 : mapa.entrySet()) 
@@ -927,7 +1036,8 @@ public class SIL
                                                          tipooperacion = false;
                                                          i = i + 2;
                                                          break;
-                                                     } else 
+                                                     } 
+                                                     else 
                                                      {
                                                          constructorcadenas.append(elemento3.getKey());
                                                          tipooperacion = true;
@@ -956,7 +1066,8 @@ public class SIL
 
                                          }
 
-                                     } else 
+                                     } 
+                                     else 
                                      {
                                          temporal = temporal - Integer.parseInt(baseletra.get(finalpass).toString());
                                          if (temporal > 0) 
@@ -973,7 +1084,8 @@ public class SIL
 
                                              }
                                              break;
-                                         } else 
+                                         } 
+                                         else 
                                          {
                                              constructorcadenas.append(String.valueOf(cadenasfinal[i + 1]));
                                              tipooperacion = true;
@@ -987,6 +1099,7 @@ public class SIL
                      }
                  }
              }
+             
              finalpass += constructorcadenas.toString();
 
          } catch (ArrayIndexOutOfBoundsException ex) 
@@ -996,6 +1109,7 @@ public class SIL
          }
 
          return finalpass;
+         
      }//desencriptar
     /**
      * Verfica si una cadena es un numero o no
@@ -1008,10 +1122,12 @@ public class SIL
         {
             Integer.parseInt(cadena);
             return true;
+            
         } catch (NumberFormatException nfe) 
         {
             return false;
         }
+        
     }//isNumeric
     /**
      * Verifica una cadena y agrega a la base de datos los caracteres desconocidos en ella
@@ -1023,7 +1139,8 @@ public class SIL
         String caracteresdesconocidos = new String();
         int contadora = 0;
         int contadoraNumeros = 0;
-        for(int i = 0; i < cadena.length(); i++) {
+        for(int i = 0; i < cadena.length(); i++) 
+        {
             contadora = 0;
             for(String elemento: letras)
             {
@@ -1055,7 +1172,8 @@ public class SIL
                 letras.add(String.valueOf(cadena.charAt(i)));
             }
             
-        }        
+        }  
+        
     }//verificarCadena
     
     /**
@@ -1103,11 +1221,12 @@ public class SIL
                 {
                     if(i == 0)
                     {
-                    numeroactual = Integer.parseInt(String.valueOf(cadenanumerica.charAt(i)));
-                    numerofinal = numeroactual + Integer.parseInt(String.valueOf(cadenanumerica.charAt(i + 1)));
-                    flag = false;
-                    i++;
-                    }else 
+                    	numeroactual = Integer.parseInt(String.valueOf(cadenanumerica.charAt(i)));
+                    	numerofinal = numeroactual + Integer.parseInt(String.valueOf(cadenanumerica.charAt(i + 1)));
+                    	flag = false;
+                    	i++;
+                    }
+                    else 
                     {
                         numeroactual = Integer.parseInt(String.valueOf(cadenanumerica.charAt(i)));
                         numerofinal = numerofinal + Integer.parseInt(String.valueOf(cadenanumerica.charAt(i)));  
@@ -1118,11 +1237,12 @@ public class SIL
                 {
                     if(i == 0)
                     {
-                    numeroactual = Integer.parseInt(String.valueOf(cadenanumerica.charAt(i))); 
-                    numerofinal = numeroactual - Integer.parseInt(String.valueOf(cadenanumerica.charAt(i + 1)));
-                    flag = true;
-                    i++;
-                    }else 
+                    	numeroactual = Integer.parseInt(String.valueOf(cadenanumerica.charAt(i))); 
+                    	numerofinal = numeroactual - Integer.parseInt(String.valueOf(cadenanumerica.charAt(i + 1)));
+                    	flag = true;
+                    	i++;
+                    }
+                    else 
                     {
                         numeroactual = Integer.parseInt(String.valueOf(cadenanumerica.charAt(i))); 
                         numerofinal = numerofinal - Integer.parseInt(String.valueOf(cadenanumerica.charAt(i)));
@@ -1140,7 +1260,9 @@ public class SIL
                     }
                 }
             }
+            
             return String.valueOf(numerofinal);
+            
     }//getHashNumber
     /**
      * Agrega el hash a la primera posicion y envia la base a la ultima
@@ -1151,11 +1273,14 @@ public class SIL
     private static String addHash(String cadena, String hash) 
     {
         String cadenafinal = hash + "¬";
-        for(int i = 1; i < cadena.length(); i++) {
+        for(int i = 1; i < cadena.length(); i++) 
+        {
              cadenafinal += cadena.charAt(i);
         }
         cadenafinal += cadena.charAt(0);
+        
         return cadenafinal;
+        
     }//addHash
     /**
      * Agrega la base a la primera y elimina el Hash
@@ -1167,7 +1292,8 @@ public class SIL
          String cadenafinal = "";
          int index = 1;
          
-         for(int i = 0; i < cadena.length() - 1; i++) {
+         for(int i = 0; i < cadena.length() - 1; i++) 
+         {
             if(cadena.charAt(i) != '¬') 
                 index++;
                 else 
@@ -1180,6 +1306,7 @@ public class SIL
          }
          cadenafinal  = cadena.charAt(cadena.length() - 1) + cadenafinal  ;
          return cadenafinal;
+         
      }//reverseHash
     /**
      * Nos devuelve los caracteres de la base de datos
@@ -1188,6 +1315,7 @@ public class SIL
     public static ArrayList<String> getLetras() 
     {
         return letras;
+        
     }//getLetras
     
     /**
@@ -1204,7 +1332,8 @@ public class SIL
         numeros.add("7");
         numeros.add("8");
         numeros.add("9");
-        numeros.add("0");
+        numeros.add("0");        
+        
     }//fullNumeros
     /**
      * 
@@ -1274,11 +1403,289 @@ public class SIL
         letras.add("/");
         letras.add("@");
         letras.add("+");
-        letras.add(",");
-        letras.add("_");
+        letras.add(",");        
         letras.add("_");
         letras.add("¬");
         letras.add("(");
-    }//fullLetras 
+        
+    }//fullLetras
+    
+	/**
+	 * 
+	 * @return
+	 */
+	private static Map<String, Integer> mapaLetrasNumero()
+	{
+		mapa = new HashMap<String, Integer>();
+		int i = 0;
+		for(; i < letras.size() ; i++) 
+		{			
+			mapa.put(letras.get(i), i);
+		}
+		
+		//Numeros
+		for(int  j = 0; j < numeros.size() ; j++)
+		{
+			mapa.put(numeros.get(j), i);
+			i++;
+		}
+		
+		return mapa;
+		
+	}//mapaLetrasNumero
+	
+	/**
+	 * 
+	 * @param letter
+	 * @return
+	 */
+	private static String getLetterFromNumber(int number) throws Exception
+	{
+		Optional<Entry<String, Integer>> entry_set = mapa.entrySet().stream().filter(map -> map.getValue() == number).findFirst();
+		if(entry_set.isPresent())
+		{
+			return entry_set.get().getKey();
+			
+		}else
+		{
+			throw new Exception("No se encuentra la llave para el valor: "+number);
+		}
+				
+	}//getNumberFromLetter
+
+	/**
+	 * 
+	 * @param letter
+	 * @return
+	 */
+	private static Integer getNumberFromLetter(String letter) throws Exception
+	{
+		return mapa.get(letter) > mapa.size() ? 0 : mapa.get(letter);
+		
+	}//getNumberFromLetter
+	
+	/**
+	 * Convierte una cadena en matrices
+	 * @param cadena
+	 */
+	public static String calculo_matricial(String cadena)
+	{
+		final int filas    		= 3;
+		final int columnas 		= 3;
+		int contador_filas 		= 0;
+		int contador_columnas	= 0;	
+		int llenar_vacios		= 0;
+		int tamano_ideal		= 9;
+		boolean entro 			= false;
+		char _default           = '\0';		
+		//double numero_aureo		= numeroAureo();
+		String cadena_final		= new String();
+		char[][] matriz 					= new char[filas][columnas];
+		List<char[][]> matrices 			= new ArrayList<char[][]>();	
+		
+		//Llenamos las matrices
+		for(char a: cadena.toCharArray())
+		{			
+			llenar_vacios++;
+			matriz[contador_filas][contador_columnas] = a;
+			if(contador_filas + 1 == filas && contador_columnas + 1 == columnas)//ya cumplio las filas 
+			{
+				contador_filas 	  = 0;
+				contador_columnas = 0;
+				matrices.add(matriz);
+				matriz 	= new char[filas][columnas];
+				entro = true;
+				continue;
+			}else if(contador_filas + 1 == filas)
+			{
+				entro = false;
+				contador_columnas++;
+				contador_filas = 0;
+				continue;
+			}
+			
+			contador_filas++;
+									
+		}//for
+		
+		if(!entro) 
+		{			
+			matrices.add(matriz);			
+		}				
+		
+		int tamano_matriz = matrices.size() * tamano_ideal; 
+		int diferencia 	  = tamano_matriz - llenar_vacios;		
+		char[][] matriz_r = matrices.get(matrices.size() - 1);//la ultima matriz
+		
+		//Llenamos el resto de la matriz ultima, con vacios		
+		while(diferencia > 0)
+		{			
+			matriz_r[contador_filas][contador_columnas] = _default;			
+			if(contador_filas + 1 == filas)
+			{
+				entro = false;
+				contador_columnas++;
+				contador_filas = 0;
+				diferencia--;
+				continue;
+			}
+			contador_filas++;
+			diferencia--;
+			
+		}//while				
+		
+		//Pintamos las matrices y trasponemos las matrices
+		for(char[][] matriz_i: matrices)
+		{
+			char[][] matriz_traspuesta 	= new char[filas][columnas];
+			int[][] matriz_numerica		= new int[filas][columnas];
+			
+			for(int i = 0; i < filas; i++)
+			{
+				for(int j = 0; j < columnas; j++)
+				{
+					int number = 0;
+					matriz_traspuesta[j][i] = matriz_i[j][i];
+					char actual = matriz_traspuesta[j][i];
+					try
+					{
+						if((actual + "").equalsIgnoreCase(_default + ""))
+						{
+							continue;
+						}
+						number = getNumberFromLetter(actual + "");
+						//number = number + 1;
+						String cadena_t = getLetterFromNumber(number);
+						cadena_final += cadena_t;
+						matriz_numerica[j][i] = number;
+						
+					}catch(Exception ex)
+					{
+						number = 99;						
+					}			
+					
+				}//for
+				
+			}//for
+			
+		}//for
+		
+		return cadena_final;
+				
+		
+	}//calculo_matricial
+	
+	/**
+	 * Reverse
+	 * @param cadena
+	 * @return
+	 * @throws Exception
+	 */
+	public static String calculo_matricial_r(String cadena) throws Exception
+	{
+		final int filas    		= 3;
+		final int columnas 		= 3;
+		int contador_filas 		= 0;
+		int contador_columnas	= 0;	
+		int llenar_vacios		= 0;
+		int tamano_ideal		= 9;
+		boolean entro 			= false;
+		char _default           = '\0';		
+		//double numero_aureo		= numeroAureo();
+		String cadena_final		= new String();
+		char[][] matriz 					= new char[filas][columnas];
+		List<char[][]> matrices 			= new ArrayList<char[][]>();			
+		
+		//Llenamos las matrices
+		for(char a: cadena.toCharArray())
+		{			
+			llenar_vacios++;
+			matriz[contador_filas][contador_columnas] = a;
+			if(contador_filas + 1 == filas && contador_columnas + 1 == columnas)//ya cumplio las filas 
+			{
+				contador_filas 	  = 0;
+				contador_columnas = 0;
+				matrices.add(matriz);
+				matriz 	= new char[filas][columnas];
+				entro = true;
+				continue;
+			}else if(contador_filas + 1 == filas)
+			{
+				entro = false;
+				contador_columnas++;
+				contador_filas = 0;
+				continue;
+			}
+			
+			contador_filas++;
+									
+		}//for
+		
+		if(!entro) 
+		{			
+			matrices.add(matriz);			
+		}				
+		
+		int tamano_matriz = matrices.size() * tamano_ideal; 
+		int diferencia 	  = tamano_matriz - llenar_vacios;		
+		char[][] matriz_r = matrices.get(matrices.size() - 1);//la ultima matriz
+		
+		//Llenamos el resto de la matriz ultima, con vacios		
+		while(diferencia > 0)
+		{			
+			matriz_r[contador_filas][contador_columnas] = _default;			
+			if(contador_filas + 1 == filas)
+			{
+				entro = false;
+				contador_columnas++;
+				contador_filas = 0;
+				diferencia--;
+				continue;
+			}
+			contador_filas++;
+			diferencia--;
+			
+		}//while	
+		
+		//Pintamos las matrices y trasponemos las matrices
+		for(char[][] matriz_i: matrices)
+		{
+			char[][] matriz_traspuesta 	= new char[filas][columnas];
+			int[][] matriz_numerica		= new int[filas][columnas];
+			
+			for(int i = 0; i < filas; i++)
+			{
+				for(int j = 0; j < columnas; j++)
+				{					
+					int number = 0;
+					matriz_traspuesta[j][i] = matriz_i[j][i];
+					char actual = matriz_traspuesta[j][i];
+					if((actual + "").equalsIgnoreCase(_default + ""))
+					{
+						continue;
+					}
+					try
+					{							
+						number = getNumberFromLetter(actual + "");						
+						//number = number - 1;						
+						String cadena_t = getLetterFromNumber(number);
+						cadena_final += cadena_t;
+						matriz_numerica[j][i] = number;
+						
+					}catch(Exception ex)
+					{
+						number = 99;						
+					}			
+					
+				}//for
+				
+			}//for
+			
+			
+		}//for
+		
+		return cadena_final;
+		
+	}//calculo_matricial_r
 
 }//No borrar
