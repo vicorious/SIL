@@ -69,7 +69,7 @@ public class Main
 	public static String encriptar(String mi_cadena) throws Exception
 	{
 		SIL sil = new SIL();
-		String encriptado = sil.encriptado(mi_cadena);
+		String encriptado = sil.encriptar(mi_cadena);
 		
 		return encriptado;
 	

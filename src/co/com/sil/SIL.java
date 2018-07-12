@@ -2,11 +2,8 @@ package co.com.sil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 /**
  *  <p>Seguridad</p>	
@@ -38,23 +35,48 @@ import java.util.Map.Entry;
 public class SIL 
 {
 		    
-    private static ArrayList<String> letras;
-    private static ArrayList<String> numeros;
-	private static Map<String, Integer> mapa;
-	//private static String llave = "LLAVE";
+    private ArrayList<String> letras;
+    private ArrayList<String> numeros;
+    private Matrix matrix;
+    
    /**
     * Constructor
     */
     public SIL() 
     {
-       SIL.letras = new ArrayList<String>();
-       SIL.numeros = new ArrayList<String>();
-              
+       this.letras = new ArrayList<String>();
+       this.numeros = new ArrayList<String>();
+                     
        fullNumeros();
        fullLetras();
-       mapaLetrasNumero();
+       
+       this.matrix = new Matrix(getLetras(), getNumeros());
               
     }//constructor
+    
+    /**
+     * Encripta una cadena
+     * @param cadena
+     * @return
+     * @throws Exception
+     */
+    public String encriptar(String cadena) throws Exception
+    {
+    	return encriptado(cadena);
+    	
+    }//encriptar
+    
+    /**
+     * Desencripta una cadena
+     * @param cadena
+     * @return
+     * @throws Exception
+     */
+    public String desencriptar(String cadena) throws Exception
+    {
+    	return desencriptado(cadena);
+    	
+    }//desencriptar
     
     /**
      * Encripta una cadena SIL
@@ -62,7 +84,7 @@ public class SIL
      * @return Retorna la cadena encriptada
      * @throws Exception 
      */
-    public String encriptado(String... parametros) throws Exception 
+    private String encriptado(String... parametros) throws Exception 
     {
     	Exception e = new Exception("Null args!!");
     	String cadena = new String();
@@ -95,7 +117,7 @@ public class SIL
         Map<String, Object> mapa = new HashMap<String, Object>();
         String finalpass = "";
         StringBuilder constructorcadenas = new StringBuilder();
-        boolean tipooperacion = tipo_operacion.isEmpty() ? Boolean.FALSE : Boolean.valueOf(tipo_operacion);
+        boolean tipooperacion = tipo_operacion == null || tipo_operacion.isEmpty() ? Boolean.FALSE : Boolean.valueOf(tipo_operacion);
 
         for (int j = 0; j < diccionario.size(); j++) 
         {
@@ -309,7 +331,7 @@ public class SIL
         finalpass += constructorcadenas.toString();  
         //System.out.println("Encriptada 1: "+finalpass);
         String hash = getHashNumber(finalpass);
-        finalpass = calculo_matricial(finalpass);
+        finalpass = this.matrix.calculo_matricial(finalpass);
         //System.out.println("After matricial: "+finalpass);
         finalpass = addHash(finalpass, hash);
         //System.out.println("After Add Hash: "+finalpass);
@@ -326,7 +348,7 @@ public class SIL
       * @return literal en su estado original
       * @throws PersistenciaException genera cuando hay desbordamiento a la derecha de una coleccion fija
       */
-     public String desencriptar(String... parametros) throws Exception
+     private String desencriptado(String... parametros) throws Exception
      {
      	Exception e = new Exception("Null args!!");
      	String cadena = new String();
@@ -359,7 +381,7 @@ public class SIL
          diccionario = letras;                 
          cadena = reverseHash(cadena);
          //System.out.println("After remove hash: "+cadena);
-         cadena = calculo_matricial_r(cadena);
+         cadena = this.matrix.calculo_matricial_r(cadena);
          //System.out.println("After remove matricial: "+cadena);
          
          int base = 0;
@@ -367,7 +389,7 @@ public class SIL
          Map<String, Object> mapa = new TreeMap<String, Object>();
          String finalpass = "";
          StringBuilder constructorcadenas = new StringBuilder();
-         boolean tipooperacion = tipo_operacion.isEmpty() ? Boolean.TRUE : Boolean.valueOf(tipo_operacion);
+         boolean tipooperacion = tipo_operacion == null || tipo_operacion.isEmpty() ? Boolean.TRUE : Boolean.valueOf(tipo_operacion);
 
          try 
          {
@@ -1134,7 +1156,7 @@ public class SIL
      * @param cadena: literal a evaluar
      */
     @SuppressWarnings("unused")
-	private static void verificarCadena(String cadena) 
+	private void verificarCadena(String cadena) 
     {
         String caracteresdesconocidos = new String();
         int contadora = 0;
@@ -1142,7 +1164,7 @@ public class SIL
         for(int i = 0; i < cadena.length(); i++) 
         {
             contadora = 0;
-            for(String elemento: letras)
+            for(String elemento: this.letras)
             {
                 if(String.valueOf(cadena.charAt(i)).equals(elemento))
                 {
@@ -1154,7 +1176,7 @@ public class SIL
             
             //numeros
             
-            for(String elemento: numeros)
+            for(String elemento: this.numeros)
             {
                 contadoraNumeros = 0;
                 if(String.valueOf(cadena.charAt(i)).equals(elemento))
@@ -1169,7 +1191,7 @@ public class SIL
             if(contadora == 0 && contadoraNumeros == 0) 
             {
                 caracteresdesconocidos += cadena.charAt(i);
-                letras.add(String.valueOf(cadena.charAt(i)));
+                this.letras.add(String.valueOf(cadena.charAt(i)));
             }
             
         }  
@@ -1182,7 +1204,7 @@ public class SIL
      * @return Hash completo
      */
     @SuppressWarnings("unused")
-    private static String getHashNumber(String cadena) 
+    private String getHashNumber(String cadena) 
     {
         int contador = 0;
         int contadora = 0;
@@ -1190,9 +1212,9 @@ public class SIL
         // False si empieza restando
         boolean flag = false;
         HashMap<String, Integer> mapa = new HashMap<String, Integer>();
-        for (int j = 0; j < letras.size(); j++) 
+        for (int j = 0; j < this.letras.size(); j++) 
         {
-            mapa.put(letras.get(j), contador);
+            mapa.put(this.letras.get(j), contador);
             contador++;
         }
             for(int i = 0; i < cadena.length(); i++) 
@@ -1270,7 +1292,7 @@ public class SIL
      * @param hash: hash generado al literal
      * @return
      */
-    private static String addHash(String cadena, String hash) 
+    private String addHash(String cadena, String hash) 
     {
         String cadenafinal = hash + "¬";
         for(int i = 1; i < cadena.length(); i++) 
@@ -1287,7 +1309,7 @@ public class SIL
      * @param cadena: literal a reversar
      * @return literal reversado
      */
-     private static String reverseHash(String cadena) 
+     private String reverseHash(String cadena) 
      {
          String cadenafinal = "";
          int index = 1;
@@ -1312,27 +1334,37 @@ public class SIL
      * Nos devuelve los caracteres de la base de datos
      * @return coleccion con las letras
      */
-    public static ArrayList<String> getLetras() 
+    public ArrayList<String> getLetras() 
     {
-        return letras;
+        return this.letras;
         
     }//getLetras
+    
+    /**
+     * 
+     * @return
+     */
+    public ArrayList<String> getNumeros()
+    {
+    	return this.numeros;
+    	
+    }//getNumeros
     
     /**
      * 
      */
     private void fullNumeros() 
     {
-        numeros.add("1");
-        numeros.add("2");
-        numeros.add("3");
-        numeros.add("4");
-        numeros.add("5");
-        numeros.add("6");
-        numeros.add("7");
-        numeros.add("8");
-        numeros.add("9");
-        numeros.add("0");        
+    	this.numeros.add("1");
+    	this.numeros.add("2");
+    	this.numeros.add("3");
+    	this.numeros.add("4");
+    	this.numeros.add("5");
+    	this.numeros.add("6");
+    	this.numeros.add("7");
+    	this.numeros.add("8");
+    	this.numeros.add("9");
+    	this.numeros.add("0");        
         
     }//fullNumeros
     /**
@@ -1340,352 +1372,76 @@ public class SIL
      */
     private void fullLetras() 
     {
-        letras.add("a");
-        letras.add("b");
-        letras.add("c");
-        letras.add("d");
-        letras.add("e");
-        letras.add("f");
-        letras.add("g");
-        letras.add("h");
-        letras.add("i");
-        letras.add("j");
-        letras.add("k");
-        letras.add("l");
-        letras.add("m");
-        letras.add("n");
-        letras.add("ñ");
-        letras.add("o");
-        letras.add("p");
-        letras.add("q");
-        letras.add("r");
-        letras.add("s");
-        letras.add("t");
-        letras.add("u");
-        letras.add("v");
-        letras.add("w");
-        letras.add("x");
-        letras.add("y");
-        letras.add("z");
-        letras.add("A");
-        letras.add("B");
-        letras.add("C");
-        letras.add("D");
-        letras.add("E");
-        letras.add("F");
-        letras.add("G");
-        letras.add("H");
-        letras.add("I");
-        letras.add("J");
-        letras.add("K");
-        letras.add("L");
-        letras.add("M");
-        letras.add("N");
-        letras.add("Ñ");
-        letras.add("O");
-        letras.add("P");
-        letras.add("Q");
-        letras.add("R");
-        letras.add("S");
-        letras.add("T");
-        letras.add("U");
-        letras.add("V");
-        letras.add("W");
-        letras.add("X");
-        letras.add("Y");
-        letras.add("Z");        
-        letras.add(".");
-        letras.add("-");
-        letras.add("?");
-        letras.add("*");
-        letras.add("¿");
-        letras.add("&");
-        letras.add("/");
-        letras.add("@");
-        letras.add("+");
-        letras.add(",");        
-        letras.add("_");
-        letras.add("¬");
-        letras.add("(");
+    	this.letras.add("a");
+    	this.letras.add("b");
+    	this.letras.add("c");
+    	this.letras.add("d");
+    	this.letras.add("e");
+    	this.letras.add("f");
+    	this.letras.add("g");
+    	this.letras.add("h");
+    	this.letras.add("i");
+    	this.letras.add("j");
+    	this.letras.add("k");
+    	this.letras.add("l");
+    	this.letras.add("m");
+    	this.letras.add("n");
+    	this.letras.add("ñ");
+    	this.letras.add("o");
+    	this.letras.add("p");
+    	this.letras.add("q");
+    	this.letras.add("r");
+    	this.letras.add("s");
+    	this.letras.add("t");
+    	this.letras.add("u");
+    	this.letras.add("v");
+    	this.letras.add("w");
+    	this.letras.add("x");
+    	this.letras.add("y");
+    	this.letras.add("z");
+    	this.letras.add("A");
+    	this.letras.add("B");
+    	this.letras.add("C");
+    	this.letras.add("D");
+    	this.letras.add("E");
+    	this.letras.add("F");
+    	this.letras.add("G");
+    	this.letras.add("H");
+    	this.letras.add("I");
+    	this.letras.add("J");
+    	this.letras.add("K");
+    	this.letras.add("L");
+    	this.letras.add("M");
+    	this.letras.add("N");
+    	this.letras.add("Ñ");
+    	this.letras.add("O");
+    	this.letras.add("P");
+    	this.letras.add("Q");
+    	this.letras.add("R");
+    	this.letras.add("S");
+    	this.letras.add("T");
+    	this.letras.add("U");
+    	this.letras.add("V");
+    	this.letras.add("W");
+    	this.letras.add("X");
+    	this.letras.add("Y");
+    	this.letras.add("Z");        
+    	this.letras.add(".");
+    	this.letras.add("-");
+    	this.letras.add("?");
+    	this.letras.add("*");
+    	this.letras.add("¿");
+    	this.letras.add("&");
+    	this.letras.add("/");
+    	this.letras.add("@");
+    	this.letras.add("+");
+    	this.letras.add(",");        
+    	this.letras.add("_");
+    	this.letras.add("¬");
+    	this.letras.add("(");
         
     }//fullLetras
     
-	/**
-	 * 
-	 * @return
-	 */
-	private static Map<String, Integer> mapaLetrasNumero()
-	{
-		mapa = new HashMap<String, Integer>();
-		int i = 0;
-		for(; i < letras.size() ; i++) 
-		{			
-			mapa.put(letras.get(i), i);
-		}
-		
-		//Numeros
-		for(int  j = 0; j < numeros.size() ; j++)
-		{
-			mapa.put(numeros.get(j), i);
-			i++;
-		}
-		
-		return mapa;
-		
-	}//mapaLetrasNumero
 	
-	/**
-	 * 
-	 * @param letter
-	 * @return
-	 */
-	private static String getLetterFromNumber(int number) throws Exception
-	{
-		Optional<Entry<String, Integer>> entry_set = mapa.entrySet().stream().filter(map -> map.getValue() == number).findFirst();
-		if(entry_set.isPresent())
-		{
-			return entry_set.get().getKey();
-			
-		}else
-		{
-			throw new Exception("No se encuentra la llave para el valor: "+number);
-		}
-				
-	}//getNumberFromLetter
-
-	/**
-	 * 
-	 * @param letter
-	 * @return
-	 */
-	private static Integer getNumberFromLetter(String letter) throws Exception
-	{
-		return mapa.get(letter) > mapa.size() ? 0 : mapa.get(letter);
-		
-	}//getNumberFromLetter
-	
-	/**
-	 * Convierte una cadena en matrices
-	 * @param cadena
-	 */
-	public static String calculo_matricial(String cadena)
-	{
-		final int filas    		= 3;
-		final int columnas 		= 3;
-		int contador_filas 		= 0;
-		int contador_columnas	= 0;	
-		int llenar_vacios		= 0;
-		int tamano_ideal		= 9;
-		boolean entro 			= false;
-		char _default           = '\0';		
-		//double numero_aureo		= numeroAureo();
-		String cadena_final		= new String();
-		char[][] matriz 					= new char[filas][columnas];
-		List<char[][]> matrices 			= new ArrayList<char[][]>();	
-		
-		//Llenamos las matrices
-		for(char a: cadena.toCharArray())
-		{			
-			llenar_vacios++;
-			matriz[contador_filas][contador_columnas] = a;
-			if(contador_filas + 1 == filas && contador_columnas + 1 == columnas)//ya cumplio las filas 
-			{
-				contador_filas 	  = 0;
-				contador_columnas = 0;
-				matrices.add(matriz);
-				matriz 	= new char[filas][columnas];
-				entro = true;
-				continue;
-			}else if(contador_filas + 1 == filas)
-			{
-				entro = false;
-				contador_columnas++;
-				contador_filas = 0;
-				continue;
-			}
-			
-			contador_filas++;
-									
-		}//for
-		
-		if(!entro) 
-		{			
-			matrices.add(matriz);			
-		}				
-		
-		int tamano_matriz = matrices.size() * tamano_ideal; 
-		int diferencia 	  = tamano_matriz - llenar_vacios;		
-		char[][] matriz_r = matrices.get(matrices.size() - 1);//la ultima matriz
-		
-		//Llenamos el resto de la matriz ultima, con vacios		
-		while(diferencia > 0)
-		{			
-			matriz_r[contador_filas][contador_columnas] = _default;			
-			if(contador_filas + 1 == filas)
-			{
-				entro = false;
-				contador_columnas++;
-				contador_filas = 0;
-				diferencia--;
-				continue;
-			}
-			contador_filas++;
-			diferencia--;
-			
-		}//while				
-		
-		//Pintamos las matrices y trasponemos las matrices
-		for(char[][] matriz_i: matrices)
-		{
-			char[][] matriz_traspuesta 	= new char[filas][columnas];
-			int[][] matriz_numerica		= new int[filas][columnas];
-			
-			for(int i = 0; i < filas; i++)
-			{
-				for(int j = 0; j < columnas; j++)
-				{
-					int number = 0;
-					matriz_traspuesta[j][i] = matriz_i[j][i];
-					char actual = matriz_traspuesta[j][i];
-					try
-					{
-						if((actual + "").equalsIgnoreCase(_default + ""))
-						{
-							continue;
-						}
-						number = getNumberFromLetter(actual + "");
-						//number = number + 1;
-						String cadena_t = getLetterFromNumber(number);
-						cadena_final += cadena_t;
-						matriz_numerica[j][i] = number;
-						
-					}catch(Exception ex)
-					{
-						number = 99;						
-					}			
-					
-				}//for
-				
-			}//for
-			
-		}//for
-		
-		return cadena_final;
-				
-		
-	}//calculo_matricial
-	
-	/**
-	 * Reverse
-	 * @param cadena
-	 * @return
-	 * @throws Exception
-	 */
-	public static String calculo_matricial_r(String cadena) throws Exception
-	{
-		final int filas    		= 3;
-		final int columnas 		= 3;
-		int contador_filas 		= 0;
-		int contador_columnas	= 0;	
-		int llenar_vacios		= 0;
-		int tamano_ideal		= 9;
-		boolean entro 			= false;
-		char _default           = '\0';		
-		//double numero_aureo		= numeroAureo();
-		String cadena_final		= new String();
-		char[][] matriz 					= new char[filas][columnas];
-		List<char[][]> matrices 			= new ArrayList<char[][]>();			
-		
-		//Llenamos las matrices
-		for(char a: cadena.toCharArray())
-		{			
-			llenar_vacios++;
-			matriz[contador_filas][contador_columnas] = a;
-			if(contador_filas + 1 == filas && contador_columnas + 1 == columnas)//ya cumplio las filas 
-			{
-				contador_filas 	  = 0;
-				contador_columnas = 0;
-				matrices.add(matriz);
-				matriz 	= new char[filas][columnas];
-				entro = true;
-				continue;
-			}else if(contador_filas + 1 == filas)
-			{
-				entro = false;
-				contador_columnas++;
-				contador_filas = 0;
-				continue;
-			}
-			
-			contador_filas++;
-									
-		}//for
-		
-		if(!entro) 
-		{			
-			matrices.add(matriz);			
-		}				
-		
-		int tamano_matriz = matrices.size() * tamano_ideal; 
-		int diferencia 	  = tamano_matriz - llenar_vacios;		
-		char[][] matriz_r = matrices.get(matrices.size() - 1);//la ultima matriz
-		
-		//Llenamos el resto de la matriz ultima, con vacios		
-		while(diferencia > 0)
-		{			
-			matriz_r[contador_filas][contador_columnas] = _default;			
-			if(contador_filas + 1 == filas)
-			{
-				entro = false;
-				contador_columnas++;
-				contador_filas = 0;
-				diferencia--;
-				continue;
-			}
-			contador_filas++;
-			diferencia--;
-			
-		}//while	
-		
-		//Pintamos las matrices y trasponemos las matrices
-		for(char[][] matriz_i: matrices)
-		{
-			char[][] matriz_traspuesta 	= new char[filas][columnas];
-			int[][] matriz_numerica		= new int[filas][columnas];
-			
-			for(int i = 0; i < filas; i++)
-			{
-				for(int j = 0; j < columnas; j++)
-				{					
-					int number = 0;
-					matriz_traspuesta[j][i] = matriz_i[j][i];
-					char actual = matriz_traspuesta[j][i];
-					if((actual + "").equalsIgnoreCase(_default + ""))
-					{
-						continue;
-					}
-					try
-					{							
-						number = getNumberFromLetter(actual + "");						
-						//number = number - 1;						
-						String cadena_t = getLetterFromNumber(number);
-						cadena_final += cadena_t;
-						matriz_numerica[j][i] = number;
-						
-					}catch(Exception ex)
-					{
-						number = 99;						
-					}			
-					
-				}//for
-				
-			}//for
-			
-			
-		}//for
-		
-		return cadena_final;
-		
-	}//calculo_matricial_r
 
 }//No borrar
