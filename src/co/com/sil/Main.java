@@ -34,24 +34,36 @@ public class Main
 	{
 		try
 		{
-			if(args == null || args.length == 0 || args.length > 1)
+			if(args == null || args.length == 0 || args.length > 2)
 			{
 				throw new Exception("Empty args no valid!");
 			}
 			
 			String mi_cadena		 = args[0];
-		
-			String encriptado 		 = encriptar(mi_cadena);
-		
-			String desencriptado 	 = desencriptar(encriptado);
 			
-			System.out.println("Encriptada: ");
+			String tipo = args[1];
 			
-			System.out.println(encriptado);
+			String desencriptado = new String();
+			String encriptado = new String();
+			System.out.println("Cadena: ");
+			System.out.println("Accion ".append(tipo).append(" : "));
 			
-			System.out.println("Desencriptada: ");
+			System.out.println(mi_cadena);
 			
-			System.out.println(desencriptado);			
+			if(tipo.equalsIgnoreCase("DES"))
+			{
+				desencriptado 	 = desencriptar(encriptado);
+				System.out.println(desencriptado);
+			}
+			else if(tipo.equalsIgnoreCase("ENC"))				
+			{
+				encriptado 	 = encriptar(mi_cadena);																	
+				System.out.println(encriptado);
+			}else
+			{
+				throws new IllegalArgumentException("Param 2 between DES AND ENC value's");
+			}
+						
 			
 		}catch(Exception ex)
 		{
