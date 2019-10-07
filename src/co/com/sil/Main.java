@@ -61,7 +61,7 @@ public class Main
 				System.out.println(encriptado);
 			}else
 			{
-				throws new IllegalArgumentException("Param 2 between DES AND ENC value's");
+				throws new IllegalArgumentException("Param should be DES AND ENC value");
 			}
 						
 			
